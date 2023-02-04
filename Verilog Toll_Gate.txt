@@ -1,0 +1,70 @@
+module main(
+input clk,
+input [2:0]ds,//distance sensor
+input [10:0] card_id,
+input [9:0] card_currency,//money input
+output reg [9:0] new_card_currency,//money output
+output reg student, teacher, allow_access// card valid and they can eat );
+reg read;
+//127 etacher, 896 student
+initial begin
+new_card_currency=card_currency;
+student=0;
+teacher=0;
+end
+always@(posedge clk)begin
+if(ds<3'd5) 
+begin
+read=1'b1;
+end
+else read=0;
+end
+always@(posedge read) 
+begin
+read=0;
+if(card_id[8]== 1'b1 | card_id[9]== 1'b1 | card_id[10]== 1'b1)//student since first 127 is teacher
+begin
+if(card_id== 11'b10011101010) //some student id
+begin
+student=1;
+teacher=0;
+if(card_currency>=3'd5)
+begin
+new_card_currency=card_currency-3'd5;
+allow_access=1'b1;
+end
+else begin // not enough money
+allow_access=0;
+new_card_currency=card_currency;
+end
+end 
+else begin 
+allow_access=0; //card not found in system
+teacher=0;
+student=0;
+new_card_currency=card_currency;
+end
+end
+else if (card_id[8]==0 & card_id[9]==0 & card_id[10]==0)//teacher since first 127 is teacher
+begin
+if(card_id== 11'b00001101010) //some teacher id
+begin
+teacher=1;
+student=0;
+if(card_currency>=4'd13)
+begin
+new_card_currency=card_currency-4'd13;
+allow_access=1;
+end
+else begin// not enough money
+allow_access=0;
+new_card_currency=card_currency;
+end
+end
+else begin//card not found in system
+allow_access=0;
+new_card_currency=card_currency;
+end
+end
+end
+endmodule
