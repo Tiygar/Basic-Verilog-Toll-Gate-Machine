@@ -1,0 +1,39 @@
+module maintb;
+reg clk;
+reg [2:0]ds;
+reg [10:0] card_id;
+reg [9:0] card_currency;
+wire [9:0] new_card_currency;
+wire allow_access, student, teacher;
+main UUT(clk,ds, card_id, card_currency, new_card_currency, student, teacher, allow_access);
+initial begin 
+clk=0;
+forever
+#5 clk=~clk;
+end
+initial begin
+ds=3'd3; //there is a card in front of the sensor
+card_id=11'b10011101010; // 5ea a student card from marmara
+card_currency=10'd3; // cant pass as student nor as teacher
+#30;
+ds=3'd3;
+card_id=11'b10011101010;
+card_currency=10'd7; // 4ea can pass as student, cant pass as teacher
+#30;
+ds=3'd3;
+card_id=11'b00001101010;
+card_currency=10'd8; // 6a teacher, can pass as student, cant pass as teacher
+#30;
+ds=3'd1;
+card_id=11'b00001101010;
+card_currency=10'd15; //6a can pass as student or as a teacher
+#30;
+ds=3'd1;
+card_id=11'b11111101011; //7eb id not valid
+#30;
+ds=3'd7; //too far away for values
+card_id=11'b00001101010; // 6a teacher card
+card_currency=10'd15;
+#30;
+end
+endmodule
